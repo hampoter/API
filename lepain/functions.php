@@ -21,7 +21,5 @@ function ajax_echo(
             'i' => date('i'),
             's' => date('s'),
             'full' => date('Y-m-d H:i:s')
-        )
-    )
-);
+        )));
 };
