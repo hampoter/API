@@ -9,7 +9,7 @@ include_once("find_token.php");
 if(!isset($_GET['type'])){
     echo ajax_echo(
         "Ошибка",
-        "Не указан GET параметр type",
+        "Вы не указали GET параметр type!",
         "ERROR",
         null
     );
@@ -17,11 +17,11 @@ if(!isset($_GET['type'])){
 }
 
 //Регистрация нового пользователя 
-if(preg_match_all("/^register_new_user$/ui", $_GET['type'])){
+if(preg_match_all("/^register_user$/ui", $_GET['type'])){
     if(!isset($_GET['email'])){
         echo ajax_echo(
             "Ошибка",
-            "Не указан GET параметр email!",
+            "Не указан GET параметр email",
             "ERROR",
             null
         );
@@ -90,7 +90,8 @@ if(preg_match_all("/^register_new_user$/ui", $_GET['type'])){
         );
         exit;
     }
-    $query = "INSERT INTO `users` (`email` , `login` , `password` , `first_name` , `second_name` , `middle_name` , `date_of_birth` , `gender`) VALUES ('".$_GET['email']."' , '".$_GET['password']."' , '".$_GET['login']."' , '".$_GET['first_name']."' , '".$_GET['second_name']."' , '".$_GET['middle_name']."' , '".$_GET['date_of_birth']."' , '".$_GET['gender']."')";
+    $query = "INSERT INTO `users` (`email`,`login`,`password`,`first_name`,`second_name`,`middle_name` , `date_of_birth` , `gender`) VALUES ('".$_GET['email']."' , '".$_GET['login']."' , '".$_GET['password']."' , '".$_GET['first_name']."' , '".$_GET['second_name']."' , '".$_GET['middle_name']."' , '".$_GET['date_of_birth']."' , '".$_GET['gender']."')";
+    //exit($query);
     $res_query = mysqli_query($connection,$query);
 
     if(!$res_query){
@@ -105,8 +106,8 @@ if(preg_match_all("/^register_new_user$/ui", $_GET['type'])){
     }
 
     echo ajax_echo(
-        "Успех", 
-        "Создан новый пользователь",
+        "Успешно", 
+        "Новый пользователь был зарегестрирован",
         false,
         "SUCCESS"
     );
@@ -118,7 +119,7 @@ else if(preg_match_all("/^add_phone_number$/ui", $_GET['type'])){
     if(!isset($_GET['user_id'])){
         echo ajax_echo(
             "Ошибка",
-            "Не указан GET параметрuser_id",
+            "Не указан GET параметр user_id",
             "ERROR",
             null
         );
@@ -134,7 +135,7 @@ else if(preg_match_all("/^add_phone_number$/ui", $_GET['type'])){
         exit;
     }
     $query = "INSERT INTO `users_phones` (`user_id`, `phone`) VALUES (".$_GET['user_id'].", ".$_GET['phone'].")";
-    
+    //exit($query);
     $res_query = mysqli_query($connection, $query);
     
     if(!$res_query){
@@ -148,7 +149,7 @@ else if(preg_match_all("/^add_phone_number$/ui", $_GET['type'])){
     }
     
     echo ajax_echo(
-        "Успех",
+        "Успешно",
         "Номер телефона был добавлен",
         false,
         "SUCCESS"
@@ -195,7 +196,7 @@ else if(preg_match_all("/^add_product$/ui", $_GET['type'])){
         exit;
     }
     $query = "INSERT INTO `product` (`name`, `price`, `desc`, `weight`) VALUES ('".$_GET['name']."', ".$_GET['price']." , '".$_GET['desc']."' , ".$_GET['weight'].")";
-    
+    //exit($query);
     $res_query = mysqli_query($connection, $query);
     
     if(!$res_query){
@@ -209,7 +210,7 @@ else if(preg_match_all("/^add_product$/ui", $_GET['type'])){
     }
     
     echo ajax_echo(
-        "Успех",
+        "Успешно",
         "Новый товар был добавлен в базу данных",
         false,
         "SUCCESS"
@@ -218,7 +219,7 @@ else if(preg_match_all("/^add_product$/ui", $_GET['type'])){
 }
 
 //Вход пользователя в систему
-if(preg_match_all("/^user_sign_in$/ui", $_GET['type'])){
+if(preg_match_all("/^login$/ui", $_GET['type'])){
     if(!isset($_GET['login'])){
         echo ajax_echo(
             "Ошибка",
@@ -238,6 +239,7 @@ if(preg_match_all("/^user_sign_in$/ui", $_GET['type'])){
         exit;
     }
     $query = "SELECT COUNT(id) > 0 AS `RESULT` FROM `users` WHERE `login`='".$_GET['login']."' AND `password`='".$_GET['password']."' ";
+    //exit($query);
     $res_query = mysqli_query($connection,$query);
 
     if(!$res_query){
@@ -255,7 +257,7 @@ if(preg_match_all("/^user_sign_in$/ui", $_GET['type'])){
     if($res["RESULT"] == "0"){
         echo ajax_echo(
             "Ошибка", 
-            "Такой пользователь не существует",
+            "Такого пользователя не существует",
             true,
             "ERROR",
             null
@@ -264,7 +266,7 @@ if(preg_match_all("/^user_sign_in$/ui", $_GET['type'])){
     }
 
     echo ajax_echo(
-        "Успех", 
+        "Успешно", 
         "Пользователь авторизирован",
         false,
         "SUCCESS"
@@ -272,15 +274,59 @@ if(preg_match_all("/^user_sign_in$/ui", $_GET['type'])){
     exit();
 }
 
-//Вывод всех существующих товаров
-if(preg_match_all("/^list_all_products$/ui", $_GET['type'])){
+//Вывести товары в корзине
+else if(preg_match_all("/^list_orders$/ui", $_GET['type'])){
+    if(!isset($_GET['user_id'])){
+        echo ajax_echo(
+            "Ошибка",
+            "Не указан GET параметр user_id",
+            "ERROR",
+            null
+        );
+        exit;
+    }
+    $query = "SELECT `name`, `desc`, `price`, `weight` from `product` WHERE `id` IN (SELECT `cart_id` FROM `orders` WHERE `user_id`=".$_GET['user_id']." AND `del`=false)";
+    //exit($query);
+    $res_query = mysqli_query($connection, $query);
+    
+    if(!$res_query){
+        echo ajax_echo(
+            "Ошибка",
+            "Ошибка в запросе",
+            true,
+            null
+        );
+        exit;
+    }
+
+    $arr_res = array();
+    $rows = mysqli_num_rows($res_query);
+
+    for ($i=0; $i < $rows; $i++){
+        $row = mysqli_fetch_assoc($res_query);
+        array_push($arr_res, $row);
+    }
+    
+    echo ajax_echo(
+        "Успешно",
+        "Товары были выведены",
+        false,
+        "SUCCESS",
+        $arr_res
+    );
+    exit;
+}
+
+//Вывести все товары
+if(preg_match_all("/^list_products$/ui", $_GET['type'])){
     $type = "";
     if(isset($_GET["name"])){
         $type = "AND `type` = ".$_GET["name"];
     }
 
-    $query = "SELECT `id`,`name`,`desc`,`price`,`weight` FROM `product` WHERE `deleted`=false ".$type;
-    $res_query = mysqli_query($connection,$query);
+    $query = "SELECT `id`,`name`,`desc`,`price`,`weight` FROM `product` WHERE `del`=false ".$type;
+    //exit($query);
+    $res_query = mysqli_query($connection, $query);
 
     if(!$res_query){
         echo ajax_echo(
@@ -310,48 +356,7 @@ if(preg_match_all("/^list_all_products$/ui", $_GET['type'])){
     exit();
 }
 
-//Вывести товары в корзине
-else if(preg_match_all("/^list_orders$/ui", $_GET['type'])){
-    if(!isset($_GET['user_id'])){
-        echo ajax_echo(
-            "Ошибка",
-            "Не указан GET параметр user_id",
-            "ERROR",
-            null
-        );
-        exit;
-    }
-    $query = "SELECT `name`, `desc`, `price`, `weight` from `product` WHERE `id` IN (SELECT `product_id` FROM `orders` WHERE `user_id`=".$_GET['userid']." AND `deleted`=false)";
-    
-    $res_query = mysqli_query($connection, $query);
-    
-    if(!$res_query){
-        echo ajax_echo(
-            "Ошибка",
-            "Ошибка в запросе",
-            true,
-            null
-        );
-        exit;
-    }
 
-    $arr_res = array();
-    $rows = mysqli_num_rows($res_query);
-
-    for ($i=0; $i < $rows; $i++){
-        $row = mysqli_fetch_assoc($res_query);
-        array_push($arr_res, $row);
-    }
-    
-    echo ajax_echo(
-        "Успех",
-        "Товары были выведены",
-        false,
-        "SUCCESS",
-        $arr_res
-    );
-    exit;
-}
 
 //Вывести отзывы к товару
 else if(preg_match_all("/^product_comments$/ui", $_GET['type'])){
@@ -364,8 +369,8 @@ else if(preg_match_all("/^product_comments$/ui", $_GET['type'])){
         );
         exit;
     }
-    $query = "SELECT `date_of_append` , `comment` FROM `comments` WHERE `deleted`=false AND `product_id`=".$_GET['product_id'];
-    
+    $query = "SELECT `date_of_append` , `comment` FROM `comments` WHERE `del`=false AND `product_id`=".$_GET['product_id'];
+    //exit($query);
     $res_query = mysqli_query($connection, $query);
     
     if(!$res_query){
@@ -387,7 +392,7 @@ else if(preg_match_all("/^product_comments$/ui", $_GET['type'])){
     }
     
     echo ajax_echo(
-        "Успех",
+        "Успешно",
         "Список отзывов был выведен",
         false,
         "SUCCESS",
@@ -397,7 +402,7 @@ else if(preg_match_all("/^product_comments$/ui", $_GET['type'])){
 }
 
 //Вывести избранные товары
-else if(preg_match_all("/^list_user_favorites$/ui", $_GET['type'])){
+else if(preg_match_all("/^user_favorites$/ui", $_GET['type'])){
     if(!isset($_GET['user_id'])){
         echo ajax_echo(
             "Ошибка",
@@ -407,8 +412,8 @@ else if(preg_match_all("/^list_user_favorites$/ui", $_GET['type'])){
         );
         exit;
     }
-    $query = "SELECT `product_id`, `date_of_adding_fav_item` FROM `favorites`, (SELECT `name` FROM `product` WHERE `favorites_id`=`product_id`) AS 'product' FROM `favorites` WHERE `deleted`=false AND `user_id`=".$_GET['userid'];
-    
+    $query = "SELECT `name`, `desc`, `price`, `weight` from `product` WHERE `id` IN (SELECT `product_id` FROM `favorites` WHERE `user_id`=".$_GET['user_id']." AND `del`=false)";
+    //exit($query);
     $res_query = mysqli_query($connection, $query);
     
     if(!$res_query){
@@ -430,7 +435,7 @@ else if(preg_match_all("/^list_user_favorites$/ui", $_GET['type'])){
     }
     
     echo ajax_echo(
-        "Успех",
+        "Успешно",
         "Выведен список избранных товаров",
         false,
         "SUCCESS",
@@ -439,89 +444,7 @@ else if(preg_match_all("/^list_user_favorites$/ui", $_GET['type'])){
     exit;
 }
 
-//Удаление пользователя из системы
-if(preg_match_all("/^delete_user$/ui", $_GET['type'])){
-    if(!isset($_GET['user_id'])){
-        echo ajax_echo(
-            "Ошибка",
-            "Не указан GET параметр user_id",
-            "ERROR",
-            null
-        );
-        exit;
-    }
-    $query = "UPDATE `users` SET `deleted`=true WHERE `id`=".$_GET['user_id'];
-    $res_query = mysqli_query($connection,$query);
-
-    if(!$res_query){
-        echo ajax_echo(
-            "Ошибка", 
-            "Ошибка в запросе",
-            true,
-            "ERROR",
-            null
-        );
-        exit();
-    }
-
-    echo ajax_echo(
-        "Успех", 
-        "Пользователь был удален",
-        false,
-        "SUCCESS"
-    );
-    exit();
-}
-
-//Изменение данных продукта
-else if(preg_match_all("/^update_product$/ui", $_GET['type'])){
-    if(!isset($_GET['product_id'])){
-        echo ajax_echo(
-            "Ошибка",
-            "Не указан GET параметр product_id",
-            "ERROR",
-            null
-        );
-        exit;
-    }
-
-    $desc = 'null';
-    if(isset($_GET['desc'])){
-        $desc = "'".$_GET['desc']."'";
-    }
-    $price = '';
-    if(isset($_GET['price'])){
-        $price = "`price`=".$_GET['price'].",";
-    }
-    $product_weight = 'null';
-    if(isset($_GET['weight'])){
-        $product_weight = $_GET['weight'];
-    }
-
-    $query = "UPDATE `product` SET `desc`=".$desc.",".$price."`weight`=".$product_weight." WHERE `id`=".$_GET['product_id'];
-    
-    $res_query = mysqli_query($connection, $query);
-    
-    if(!$res_query){
-        echo ajax_echo(
-            "Ошибка",
-            "Ошибка в запросе",
-            true,
-            null
-        );
-        exit;
-    }
-    
-    echo ajax_echo(
-        "Успех",
-        "Данные продукта были изменены",
-        false,
-        "SUCCESS"
-    );
-    exit;
-}
-
-//Изменение отзыва о продукте
+//Изменение отзыва о товаре
 else if(preg_match_all("/^update_comments$/ui", $_GET['type'])){
     if(!isset($_GET['product_id'])){
         echo ajax_echo(
@@ -539,11 +462,11 @@ else if(preg_match_all("/^update_comments$/ui", $_GET['type'])){
     }
     $date_of_append = 'null';
     if(isset($_GET['date_of_append'])){
-        $date_of_append = "''".$_GET['date_of_append'].",";
+        $date_of_append = $_GET['date_of_append'];
     }
 
-    $query = "UPDATE `comments` SET `date_of_append`=".$date_of_append.",`comment`=".$comment." WHERE `id`=".$_GET['product_id'];
-    
+    $query = "UPDATE `comments` SET `date_of_append` = '". $_GET['date_of_append'] ."', `comment` = '". $_GET['comment'] ."' WHERE `id` = '". $_GET['product_id'] ."'";
+    //exit($query);
     $res_query = mysqli_query($connection, $query);
     
     if(!$res_query){
@@ -551,17 +474,110 @@ else if(preg_match_all("/^update_comments$/ui", $_GET['type'])){
             "Ошибка",
             "Ошибка в запросе",
             true,
-            "ERROR",
             null
         );
         exit;
     }
     
     echo ajax_echo(
-        "Успех",
+        "Успешно",
         "Отзыв о товаре был изменён",
         false,
         "SUCCESS"
     );
     exit;
 }
+
+//Изменение пароля пользователя
+if(preg_match_all("/^change_password$/ui", $_GET['type'])){
+    if(!isset($_GET['user_id'])) {
+        echo ajax_echo(
+            "Ошибка", 
+            "Не указан GET параметр user_id", 
+            "ERROR", 
+        );
+        exit();
+    }
+    if(!isset($_GET['password'])) {
+        echo ajax_echo(
+            "Ошибка", 
+            "Не указан GET параметр password", 
+            true, 
+            "ERROR", 
+            null 
+        );
+        exit();
+    }
+
+    $query = "UPDATE `users` SET `password`='".$_GET['password'] . "' WHERE `id` = '".$_GET['user_id'] ."'";
+    //exit($query);
+    $res_query = mysqli_query($connection,$query);
+
+    if(!$res_query){
+        echo ajax_echo(
+            "Ошибка", 
+            "Ошибка в запросе",
+            true,
+            "ERROR",
+            null
+        );
+        exit();
+    }
+
+    echo ajax_echo(
+        "Успешно", 
+        "Пароль пользователя был изменён",
+        false,
+        "SUCCESS"
+    );
+    exit();
+}
+
+//Изменение данных товара
+else if(preg_match_all("/^update_product$/ui", $_GET['type'])){
+    if(!isset($_GET['product_id'])){
+        echo ajax_echo(
+            "Ошибка",
+            "Не указан GET параметр product_id",
+            "ERROR",
+            null
+        );
+        exit;
+    }
+
+    $desc = '';
+    if(isset($_GET['desc'])){
+        $desc =$_GET['desc'];
+    }
+    $price = 'null';
+    if(isset($_GET['price'])){
+        $price = "`price`=".$_GET['price'].",";
+    }
+    $weight = 'null';
+    if(isset($_GET['weight'])){
+        $weight = $_GET['weight'];
+    }
+
+    $query = "UPDATE `product` SET `desc` = '". $_GET['desc'] ."', `price` = '". $_GET['price'] ."', `weight` = '". $_GET['weight'] ."' WHERE `id` = '". $_GET['product_id'] ."'";
+    //exit($query);
+    $res_query = mysqli_query($connection, $query);
+    
+    if(!$res_query){
+        echo ajax_echo(
+            "Ошибка",
+            "Ошибка в запросе",
+            true,
+            null
+        );
+        exit;
+    }
+    
+    echo ajax_echo(
+        "Успешно",
+        "Данные товара были изменены'",
+        false,
+        "SUCCESS"
+    );
+    exit;
+}
+
