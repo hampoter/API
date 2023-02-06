@@ -35,6 +35,7 @@ if(preg_match_all("/^register_new_user$/ui", $_GET['type'])){
             null
         );
         exit;
+     }
     if(!isset($_GET['password'])){
         echo ajax_echo(
             "Ошибка",
