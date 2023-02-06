@@ -1,10 +1,10 @@
 <?php
 
 $DB = array(
-    "login" => "u0941340_ban",
-    "password" => "iT4fL5iF9reC6fJ4",
-    "host" => "localhost",
-    "name" => "u0941340_ban",
+    "login" => "u0941340_pko316",
+    "password" => "u0941340_pko316",
+    "host" => "localhost", //31.31.198.115
+    "name" => "u0941340_pko316",
     "charset" => "utf8mb4"
 );
 
