@@ -541,7 +541,7 @@ else if(preg_match_all("/^update_comments$/ui", $_GET['type'])){
         $date_of_append = "''".$_GET['date_of_append'].",";
     }
 
-    $query = "UPDATE `comments` SET `date_of_append`=".$date_of_append.","`comment`=".$comment." WHERE `id`=".$_GET['product_id'];
+    $query = "UPDATE `comments` SET `date_of_append`=".$date_of_append.",`comment`=".$comment." WHERE `id`=".$_GET['product_id'];
     
     $res_query = mysqli_query($connection, $query);
     
