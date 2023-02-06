@@ -32,8 +32,5 @@ function error_handler($errno,$errmsg, $filename, $linenum){
             'i' => date('i'),
             's' => date('s'),
             'full' => date('Y-m-d H:i:s')
-        )
-    )
-)
-);
+        ))));
 }
